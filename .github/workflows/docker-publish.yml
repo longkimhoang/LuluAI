@@ -40,5 +40,7 @@ jobs:
           context: .
           push: true
           file: LuluAI/Dockerfile
+          build-args:
+            - DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

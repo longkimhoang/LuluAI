@@ -15,6 +15,8 @@ FROM build AS publish
 RUN dotnet publish "LuluAI.csproj" -c Release -o /app/publish
 
 FROM base AS final
+ARG DISCORD_BOT_TOKEN
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "LuluAI.dll"]
+ENV DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN
+ENTRYPOINT ["dotnet", "LuluAI.dll", "--Discord:BotToken", $DISCORD_BOT_TOKEN]
