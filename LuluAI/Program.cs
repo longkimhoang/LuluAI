@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((context, configuration) =>
