@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Amazon.S3;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -24,6 +25,7 @@ public class CommandHandler
         _services = new ServiceCollection()
             .AddSingleton(_client)
             .AddSingleton(_commandService)
+            .AddSingleton<IAmazonS3, AmazonS3Client>()
             .AddLogging()
             .BuildServiceProvider();
 
