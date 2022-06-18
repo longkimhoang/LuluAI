@@ -25,7 +25,10 @@ public class CommandHandler
         _services = new ServiceCollection()
             .AddSingleton(_client)
             .AddSingleton(_commandService)
-            .AddSingleton<IAmazonS3, AmazonS3Client>()
+            .AddSingleton<IAmazonS3>(services =>
+            {
+                return new AmazonS3Client(Amazon.RegionEndpoint.APSoutheast1);
+            })
             .AddLogging()
             .BuildServiceProvider();
 
