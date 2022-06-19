@@ -2,6 +2,9 @@
 using Amazon.S3.Model;
 using Discord;
 using Discord.Commands;
+using LuluAI.Extensions;
+using LuluAI.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace LuluAI.CommandModules;
@@ -10,12 +13,14 @@ public class LuluedModule : ModuleBase<SocketCommandContext>
 {
     private readonly IAmazonS3 _s3client;
     private readonly ILogger<LuluedModule> _logger;
+    private readonly IConfiguration _config;
     private readonly Random _random;
 
-    public LuluedModule(IAmazonS3 s3client, ILogger<LuluedModule> logger)
+    public LuluedModule(IAmazonS3 s3client, ILogger<LuluedModule> logger, IConfiguration config)
     {
         _s3client = s3client;
         _logger = logger;
+        _config = config;
         _random = new();
     }
 
@@ -50,17 +55,21 @@ public class LuluedModule : ModuleBase<SocketCommandContext>
 
     private async Task<string?> GetRandomImageUrlAsync()
     {
+        AmazonS3Options options = _config.GetSection(nameof(AmazonS3Options)).Get<AmazonS3Options>();
+
         const string prefix = "lulued/";
 
         ListObjectsV2Request listObjectsRequest = new()
         {
-            BucketName = Constants.S3.BucketName,
+            BucketName = options.BucketName,
             Delimiter = "/",
             Prefix = prefix,
         };
 
         ListObjectsV2Response listObjectsResponse = await _s3client.ListObjectsV2Async(listObjectsRequest);
-        IList<S3Object> objects = listObjectsResponse.S3Objects;
+        var objects = listObjectsResponse.S3Objects
+            .Where(o => o.Size > 0)
+            .ToList();
 
         if (objects.Count == 0)
         {
@@ -70,15 +79,9 @@ public class LuluedModule : ModuleBase<SocketCommandContext>
 
         int index = _random.Next(0, objects.Count);
 
-        S3Object image = objects.ElementAt(index);
+        S3Object image = objects
+            .ElementAt(index);
 
-        GetPreSignedUrlRequest getPresignedUrlRequest = new()
-        {
-            BucketName = Constants.S3.BucketName,
-            Key = image.Key,
-            Expires = DateTime.UtcNow.AddMinutes(15),
-        };
-
-        return _s3client.GetPreSignedURL(getPresignedUrlRequest);
+        return image.GetPublicUrl(options);
     }
 }
