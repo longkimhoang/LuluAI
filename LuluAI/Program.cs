@@ -51,7 +51,7 @@ await client.StartAsync();
 
 using CommandService commandService = new();
 
-CommandHandler commandHandler = new(client, commandService);
+CommandHandler commandHandler = new(client, commandService, config);
 await commandHandler.InstallCommandsAsync();
 
 await host.RunAsync();

@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -10,12 +11,14 @@ public class CommandHandler
 {
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commandService;
+    private readonly IConfiguration _configuration;
     private IServiceProvider? _services;
 
-    public CommandHandler(DiscordSocketClient client, CommandService commandService)
+    public CommandHandler(DiscordSocketClient client, CommandService commandService, IConfiguration configuration)
     {
         _client = client;
         _commandService = commandService;
+        _configuration = configuration;
     }
 
     public async Task InstallCommandsAsync()
@@ -25,6 +28,7 @@ public class CommandHandler
         _services = new ServiceCollection()
             .AddSingleton(_client)
             .AddSingleton(_commandService)
+            .AddSingleton(_configuration)
             .AddSingleton<IAmazonS3>(services =>
             {
                 return new AmazonS3Client(Amazon.RegionEndpoint.APSoutheast1);
